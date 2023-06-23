@@ -785,7 +785,7 @@ static int scan_xml_partitions(const char *fn, uint8_t *buf, size_t buf_size) {
 	src[size] = 0;
 	p = src;
 	for (;;) {
-		int i, a = *p++, size, n; char c;
+		int i, a = *p++, n; char c; long long size;
 		if (a == ' ' || a == '\t' || a == '\n' || a == '\r') continue;
 		if (a != '<') {
 			if (!a) break;
@@ -813,7 +813,7 @@ static int scan_xml_partitions(const char *fn, uint8_t *buf, size_t buf_size) {
 			stage++;
 			continue;
 		}
-		i = sscanf(p, "Partition id=\"%35[^\"]\" size=\"%i\"/%n%c", name, &size, &n, &c);
+		i = sscanf(p, "Partition id=\"%35[^\"]\" size=\"%lli\"/%n%c", name, &size, &n, &c);
 		if (i != 3 || c != '>')
 			ERR_EXIT("xml: unexpected syntax\n");
 		p += n + 1;
@@ -825,7 +825,7 @@ static int scan_xml_partitions(const char *fn, uint8_t *buf, size_t buf_size) {
 		if (!i) ERR_EXIT("empty partition name\n");
 		WRITE32_LE(buf + 0x48, size);
 		buf += 0x4c;
-		DBG_LOG("[%d] %s, %d\n", found, name, size);
+		DBG_LOG("[%d] %s, %d\n", found, name, (int)size);
 		found++;
 	}
 	if (p - 1 != src + size) ERR_EXIT("xml: zero byte");
